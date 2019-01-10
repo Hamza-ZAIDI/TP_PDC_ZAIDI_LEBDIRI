@@ -1,6 +1,8 @@
 package gui;
 
 import com.company.model.Pendu;
+import com.company.model.PlayersHandler;
+import com.company.model.PlayersHandlerFileDAO;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
 import javafx.event.ActionEvent;
@@ -28,7 +30,7 @@ import static gui.MainApp.OPTIONS;
 public class HomeController implements Initializable {
     private static String usersFilePath = "users.dat";
     private static String wordsFilePath = null;
-    private static Pendu pendu = new Pendu(usersFilePath);
+    private static Pendu pendu =  Pendu.getPendu();
     private GridPane gridPane;
 
     public static String getWordsFilePath() {

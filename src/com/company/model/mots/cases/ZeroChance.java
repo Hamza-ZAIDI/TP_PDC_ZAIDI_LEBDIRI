@@ -7,7 +7,7 @@ public class ZeroChance extends Case {
     private final int BONUS = 3;
 
     public ZeroChance(char valeur) {
-        super(valeur);
+        setValeur(valeur);
     }
 
     @Override

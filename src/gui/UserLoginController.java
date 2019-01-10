@@ -3,6 +3,7 @@ package gui;
 import com.company.model.LoginNotFoundException;
 import com.company.model.Pendu;
 import com.company.model.Session;
+import com.company.model.mots.DAException;
 import com.company.model.mots.WordsGenerator;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
@@ -100,10 +101,8 @@ public class UserLoginController implements Controller {
             try {
                 boolean exist = pendu.LoginCheck(pseudonyme);
                 if (exist){
-                    WordsGenerator generator = new WordsGenerator(getWordsFilePath());
                     try {
-                        generator.genererListeMotsSeance();
-                        pendu.StartSession(pendu.getPlayer(pseudonyme),generator.getMotsSeance());
+                        pendu.StartSession(pendu.getPlayer(pseudonyme));
                         FXMLLoader loader = new FXMLLoader();
                         loader.setLocation(getClass().getResource(SESSION_VIEW));
                         Parent parent = loader.load();
@@ -111,6 +110,8 @@ public class UserLoginController implements Controller {
                         ((SessionViewController)loader.getController()).setGridPane1(gridPane);
                         gridPane.add(parent,0,1);
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (DAException e) {
                         e.printStackTrace();
                     }
 
@@ -120,6 +121,8 @@ public class UserLoginController implements Controller {
 
             } catch (IOException | ClassNotFoundException e) {
                 showDialogBox("ERREUR","Erreur lors de la lecture du fichier des pseudonymes");
+            } catch (DAException e) {
+                e.printStackTrace();
             }
 
         }

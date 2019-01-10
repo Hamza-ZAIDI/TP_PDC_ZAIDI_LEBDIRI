@@ -1,5 +1,6 @@
 package com.company.model.mots;
 ;
+import com.company.model.AppConfig.ParamettreJeux;
 import com.company.model.mots.cases.*;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class Mot{
     private int nbSuccess;
     private boolean correct = false;
     private ArrayList<Observer> observers = new ArrayList<>();
+   private CasesFactory factory;
 
     public boolean isMotSanctionnabl() {
         return motSanctionnabl;
@@ -35,6 +37,7 @@ public class Mot{
     public Mot(Indication indication, String valeur) {
         this.indication = indication;
         this.valeur = valeur;
+        factory = ParamettreJeux.getInstance().getCasesFactory();
     }
 
     public boolean isCorrect() {
@@ -57,58 +60,21 @@ public class Mot{
         return valeur;
     }
 
+
     /*
      *Met à jour le score d'un a l'issue d'un tentative
      */
 
     private void updateScore(Case box){
-        this.score = indication.getCoefition()*box.getScore();
-        if(ensmblesCasesSanctionnables.contains(box) && !box.isSuceces()) this.score = this.score - ((Sanctionnable)box).getMalus(motSanctionnabl);
+        this.score += indication.getCoefition()*box.getScore();
     }
     /*
     * Générer les cases formant les mots et met à jours l'attribut motSanctionnabl si nécessaire
      */
     public void genererCases(){
-        char[] lettre = this.valeur.toCharArray();// On convertit le String en un tableau de carractères
-        int i = 0;
-        int choix;
-        int nbCasesLimite = 0;
-        Case box = null;
-        Random random = new Random();
-        boolean finished = false;
-        while (!finished){// Tant que les carractères ne sont pas converti en case
-            choix = abs(random.nextInt())%3;// On choisis le type de la case à instancier selon le résultat
-            switch (choix){
-                case 0 :
-                    box = new MultiChance(lettre[i]);
-                    ensemblesCases.add(box);
-                    i++;
-                    this.ensmblesCasesSanctionnables.add((Sanctionnable)box); // Vu que c'est une case sanctionnalbe
-                    break;
-                case 1 :
-                  if(nbCasesLimite < NB_CASES_LIMITES){ // On controle la limite de nombre des cases avant d'insatncier
-                      box = new Proposition(lettre[i]);
-                      ensemblesCases.add(box);
-                      nbCasesLimite++;
-                      this.ensmblesCasesSanctionnables.add((Sanctionnable) box);
-                      i++;
-                  }
 
-                  break;
-                case 2 :
-                    if(nbCasesLimite < NB_CASES_LIMITES){
-                        box = new ZeroChance(lettre[i]);
-                        i++;
-                        nbCasesLimite++;
-                        ensemblesCases.add(box);
-                    }
-                    break;
-        }
-        if (i == lettre.length) {
-                finished = true;
-                if(ensmblesCasesSanctionnables.size()>NB_CASES_SANCTION) motSanctionnabl = true; // le mot est sanctionnable si la condition est verrifié
-        }
-    }
+        this.ensemblesCases = factory.createCases(this.valeur);
+
     }
 
     /**

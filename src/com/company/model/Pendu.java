@@ -1,5 +1,6 @@
 package com.company.model;
 
+import com.company.model.mots.DAException;
 import com.company.model.mots.Mot;
 
 import java.io.*;
@@ -10,17 +11,33 @@ import java.util.*;
  */
 public class Pendu extends Observable{
     private Session sessionActuel;
-    private  String UsersFilePath; /**le fichier contenant les utilisateurs*/
+    private PlayersHandler playersHandler;
     private boolean sessionTerminee;
-    private String highScoresFilePath = "highScors.dat"; /** le fichier contenant les meilleures scores*/
-    private TreeMap<Integer,String> highScores;
     private ArrayList<Observer> observers = new ArrayList<>();
+    private HighScoresHandler highScoresHandler;
+    private static Pendu instance;
 
-    public Pendu(String usersFilePath) {
-        UsersFilePath = usersFilePath;
+    private Pendu(){}
+
+    public static Pendu getPendu(){
+        if(instance == null){
+            instance = new Pendu();
+        }
+        return instance;
     }
-    public Player getPlayer(String pseudonyme){
-        return new LoginChecker(UsersFilePath).getPlayer(pseudonyme);
+
+    public void setPlayersHandler(PlayersHandler playersHandler) {
+        this.playersHandler = playersHandler;
+    }
+
+    public void setHighScoresHandler(HighScoresHandler highScoresHandler) {
+        this.highScoresHandler = highScoresHandler;
+    }
+
+
+
+    public Player getPlayer(String pseudonyme) throws DAException {
+        return playersHandler.findPlayer(pseudonyme);
     }
     public Session getSessionActuel() {return sessionActuel;}
     public boolean isSessionTerminee() {
@@ -35,8 +52,8 @@ public class Pendu extends Observable{
      * @return TreeMap<Integer, String>
      */
     public TreeMap<Integer, String> getHighScores() {
-        InitializeHighScores();
-        return highScores;
+
+        return highScoresHandler.getHighScores();
     }
 
 
@@ -50,9 +67,8 @@ public class Pendu extends Observable{
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public boolean LoginCheck(String pseudonyme) throws LoginNotFoundException, IOException, ClassNotFoundException {
-        LoginChecker loginChecker = new LoginChecker(UsersFilePath);
-        if (!loginChecker.Find(pseudonyme)) throw new LoginNotFoundException("Ce pseudonyme n'existent pas");
+    public boolean LoginCheck(String pseudonyme) throws LoginNotFoundException, IOException, ClassNotFoundException, DAException {
+        if (playersHandler.findPlayer(pseudonyme) == null) throw new LoginNotFoundException("Ce pseudonyme n'existent pas");
         return true;
     }
 
@@ -62,8 +78,8 @@ public class Pendu extends Observable{
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public void AddPlayer(Player player) throws IOException, ClassNotFoundException, IllegalNicknameException {
-        new LoginChecker(UsersFilePath).AddPlayer(player);
+    public void AddPlayer(Player player) throws IOException, ClassNotFoundException, IllegalNicknameException, DAException {
+        playersHandler.addPlayer(player);
     }
     /**
      * Vérifie si le caractère écrit par l'utilisateur est correcte ou pas
@@ -81,16 +97,19 @@ public class Pendu extends Observable{
     /**
      * Commence une nouvelle session du jeu pour un joueur donné
      * @param player
-     * @param mots
      */
-    public void StartSession(Player player, HashSet<Mot> mots){
-        sessionActuel = new Session(player,mots);
+    public void StartSession(Player player){
+        try {
+            sessionActuel = new Session(player);
+        } catch (DAException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Termine la session en cours et sauvegarde les scores
      */
-    public void EndSession(){
+    private void EndSession(){
         sessionTerminee = true;
         addHighScores();
         notifyObservers();
@@ -103,49 +122,18 @@ public class Pendu extends Observable{
             e.printStackTrace();
         } catch (IllegalNicknameException e) {
             e.printStackTrace();
+        } catch (DAException e) {
+            e.printStackTrace();
         }
 
     }
 
-
-    /**
-     * Récupère les meilleurs scores depuis le fichier
-     */
-    public void InitializeHighScores(){
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(highScoresFilePath)));
-            highScores = (TreeMap<Integer, String>) objectInputStream.readObject();
-            objectInputStream.close();
-        } catch (IOException|ClassNotFoundException e) {
-            highScores = null;
-        }
-    }
-
-    /**
-     * Sauvegarde les meilleurs scores dans le fichier des meilleurs scores
-     */
-    public void storeHighScores(){
-        try {
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(new File(highScoresFilePath)));
-            objectOutputStream.writeObject(highScores);
-            objectOutputStream.close();
-        } catch (IOException e) {
-
-        }
-    }
 
     /**
      * Mis à jour les meilleurs scores et les sauvegarde
      */
-    public void addHighScores(){
-        ArrayList<Integer> scores = sessionActuel.getScores();
-        String player = sessionActuel.getPlayer().getPseudonyme();
-        InitializeHighScores();
-        if (highScores == null) highScores = new TreeMap<>();
-        for (int i :scores){
-            highScores.put(i,player);
-        }
-        storeHighScores();
+    private void addHighScores(){
+        highScoresHandler.addHighScore(sessionActuel);
     }
 
     /** Des méthodes de notification (principalement utilisées avec l'interface)*/

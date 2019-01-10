@@ -10,13 +10,13 @@ public abstract class Case {
     private boolean suceces = false; //Indique si le termine avec succes
     private boolean fail = false;
 
-    public Case(char valeur) {
-        this.valeur = valeur;
-        this.score = 0;
-    }
 
     public char getValeur() {
         return valeur;
+    }
+
+    protected void setValeur(char valeur){
+        this.valeur = valeur;
     }
 
     public int getScore() {
@@ -40,6 +40,8 @@ public abstract class Case {
     }
 
     protected void setScore(int score){this.score = score;}
+
+
 
 
     /*

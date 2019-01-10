@@ -20,7 +20,7 @@ public class Proposition extends Case implements Sanctionnable
 
 
     public Proposition(char valeur) {
-        super(valeur);
+        setValeur(valeur);
         this.proposition = new char[NB_PROPSOTION];
         remplirProposition();
     }

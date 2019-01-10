@@ -1,6 +1,8 @@
 package com.company.model.mots.cases;
 
 
+import com.company.model.AppConfig.Malus;
+
 /**
  * Created by Amine on 17/04/2017.
  */
@@ -10,10 +12,10 @@ public class MultiChance extends Case implements Sanctionnable {
     private final int NB_MAX_TENTATIVE = 3;
     private final int BONUS = 1;
     private final int MALUS = 2;
-    private int malus;
+    private int malus = Malus.MULTI_CHANCE.getValue();
 
     public MultiChance(char valeur) {
-        super(valeur);
+        setValeur(valeur);
         this.nbTentativesRestant = NB_MAX_TENTATIVE;
     }
 
@@ -36,9 +38,9 @@ public class MultiChance extends Case implements Sanctionnable {
             setFail(false);
         }else if(nbTentativesRestant == 0){//Si le joueur echoue dans toutes ses tentatives
             setFail(true);// il echoue la case
-            this.malus = this.MALUS; //la case retourne un malus
+            setScore(malus); //la case retourne un malus
         }else{
-            this.malus = this.MALUS;
+            setScore(malus);
         }
     }
 

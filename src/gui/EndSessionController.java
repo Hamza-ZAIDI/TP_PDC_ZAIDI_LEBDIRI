@@ -60,10 +60,8 @@ public class EndSessionController implements Controller {
      */
     @FXML
     void onReplayButton(ActionEvent event) {
-        WordsGenerator generator = new WordsGenerator(getWordsFilePath());
         try {
-            generator.genererListeMotsSeance();
-            pendu.StartSession(pendu.getSessionActuel().getPlayer(), generator.getMotsSeance());
+            pendu.StartSession(pendu.getSessionActuel().getPlayer());
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource(SESSION_VIEW));
             Parent parent = loader.load();

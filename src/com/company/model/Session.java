@@ -1,6 +1,9 @@
 package com.company.model;
 
+import com.company.model.AppConfig.ParamettreJeux;
+import com.company.model.mots.DAException;
 import com.company.model.mots.Mot;
+import com.company.model.mots.WordsGenerator;
 
 import java.util.*;
 
@@ -25,14 +28,23 @@ public class Session extends Observable {
         return player;
     }
 
-    public Session(Player player, HashSet<Mot> mots) {
+    public Session(Player player) throws DAException {
         this.player = player;
-        this.mots = mots;
-        this.iterator = mots.iterator();
+        WordsGenerator wordsGenerator = new WordsGenerator(ParamettreJeux.getInstance().getWordsGenertorDAO());
+        this.mots = wordsGenerator.genererListeMotsSeance();
+        genererCases();
+        this.iterator = this.mots.iterator();
         this.motActuel = iterator.next();
         this.sessionTerminee = false;
         this.nombreEchecsActuel = 0 ;
 
+    }
+
+    private void genererCases(){
+        for (Mot mot: mots
+             ) {
+            mot.genererCases();
+        }
     }
 
     public ArrayList<Integer> getScores(){

@@ -2,6 +2,13 @@ package gui;/**
  * Created by Amine on 04/05/2017.
  */
 
+import com.company.model.AppConfig.BuildFailedException;
+import com.company.model.AppConfig.FilesPaths;
+import com.company.model.AppConfig.PenduBuilder;
+import com.company.model.AppConfig.PenduBuilderStandard;
+import com.company.model.Pendu;
+import com.company.model.PlayersHandlerFileDAO;
+import com.company.model.mots.cases.HighScoresFileDAO;
 import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +19,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MainApp extends Application {
+
+    PenduBuilder builder;
 
     /**
      * Les différentes scenes du jeu
@@ -32,6 +41,14 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
+        builder = new PenduBuilderStandard();
+        try {
+            buildPendu(builder);
+        } catch (BuildFailedException e) {
+            e.printStackTrace();
+        }
+
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource(HOME));
         Parent home = loader.load();
@@ -41,5 +58,12 @@ public class MainApp extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
 
+    }
+
+    private static Pendu  buildPendu(PenduBuilder builder) throws BuildFailedException {
+        return builder
+                .withPlayersHandler(new PlayersHandlerFileDAO(FilesPaths.getFilesPahts().getUsersFilePath()))
+                .withHighScoresHandler(new HighScoresFileDAO(FilesPaths.getFilesPahts().getHighScorsFilePath()))
+                .build();
     }
 }

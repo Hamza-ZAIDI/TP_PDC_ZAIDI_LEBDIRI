@@ -3,6 +3,7 @@ package gui;
 import com.company.model.IllegalNicknameException;
 import com.company.model.Pendu;
 import com.company.model.Player;
+import com.company.model.mots.DAException;
 import com.company.model.mots.WordsGenerator;
 import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
@@ -53,10 +54,8 @@ public class UserCreationController {
             try {
                 pendu.AddPlayer(new Player(pseudonyme));
                 userLoginController.hideAll();
-                WordsGenerator generator = new WordsGenerator(getWordsFilePath());
                 try {
-                    generator.genererListeMotsSeance();
-                    pendu.StartSession(new Player(pseudonyme), generator.getMotsSeance());
+                    pendu.StartSession(new Player(pseudonyme));
                     FXMLLoader loader = new FXMLLoader();
                     loader.setLocation(getClass().getResource(SESSION_VIEW));
                     Parent parent = loader.load();
@@ -72,6 +71,8 @@ public class UserCreationController {
                 e.printStackTrace();
                 } catch (IllegalNicknameException e) {
                 userLoginController.showDialogBox("ERREUR","Le pseudonyme doit commencer par une lettre!");
+            } catch (DAException e) {
+                e.printStackTrace();
             }
         }
         }
